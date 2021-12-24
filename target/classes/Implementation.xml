@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<flow name="getLeadFlow" doc:id="0491ecb1-8b95-4956-b62c-e77fa21c2982" >
+		<db:select doc:name="Select" doc:id="df7b9f5b-b19a-4286-bafe-1bba21077498" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from Lead_Information]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="391310b4-0d38-48f2-afa1-3da2b1b0986b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="bb25dc79-ad44-4c22-804d-e70b1100cc9d" config-ref="JSON_Logger_Config" message="Get all Lead Information"/>
+	</flow>
+	<flow name="getLeadByIdFlow" doc:id="45f09587-b1fe-4eb2-a82b-898ea79a694b" >
+		<db:select doc:name="Select" doc:id="6f0bf5e2-3107-4821-a00e-3f2d582bf7a1" config-ref="Database_Config">
+			<db:sql ><![CDATA[
+select * from Lead_Information
+where Lead_Id=:id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{"id" : attributes.uriParams.id}]]]></db:input-parameters>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="ce036db0-db5c-43ea-a841-27dd28bf34dc" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="ef9b1491-1db8-4f16-a409-d70ee23ddda0" config-ref="JSON_Logger_Config" message="Get all lead Information by ID"/>
+	</flow>
+	<flow name="postLeadFlow" doc:id="8c03fd5c-40df-4cad-9de1-f37667552ab4" >
+		<db:insert doc:name="Insert" doc:id="089430fa-b577-4e9e-a032-2a1513958644" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into Lead_Information values(:Lead_Id, :Name, :Company, :Mobile, :Email)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{"Lead_Id": payload.Lead_Id, "Name": payload.Name, "Company": payload.Company, "Mobile":payload.Mobile, "Email":payload.Email}]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="93155003-a2f0-4386-9e56-7813181f6b1c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"Lead Information Poasted"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="8527e027-3262-4eae-b6df-1e671d9dc7a2" config-ref="JSON_Logger_Config" message="Lead Information Poasted"/>
+	</flow>
+	<flow name="updateLeadFlow" doc:id="0ad0afaa-23c5-4faa-8796-429e981673a5" >
+		<db:update doc:name="Update" doc:id="1f0870bc-4695-47f9-8715-d09560c05e7a" config-ref="Database_Config">
+			<db:sql ><![CDATA[update Lead_Information set Name = :Name, Company =:Company, Mobile =:Mobile, Email =:Email where Lead_Id = :Lead_Id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{"Lead_Id": payload.Lead_Id, "Name": payload.Name, "Company": payload.Company, "Mobile":payload.Mobile, "Email":payload.Email}]]]></db:input-parameters>
+		</db:update>
+		<ee:transform doc:name="Transform Message" doc:id="184978bd-5853-476e-83af-2ad50bf1e103" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"Lead Information Updated"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="5b7c36ea-6eff-4ab3-ba35-5e13b2280f91" config-ref="JSON_Logger_Config" message="Lead Information Updated"/>
+	</flow>
+	<flow name="deleteLeadFlow" doc:id="3480902d-9853-4e25-892c-447f7a77ba1b" >
+		<db:delete doc:name="Delete" doc:id="f418d40f-36c9-48c8-9f8e-3fd135aada38" config-ref="Database_Config">
+			<db:sql ><![CDATA[delete from Lead_Information
+where Lead_Id=:id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{"id" : attributes.uriParams.id}]]]></db:input-parameters>
+		</db:delete>
+		<ee:transform doc:name="Transform Message" doc:id="dced37e5-ad9c-4e6e-b4da-a8718b3d5ada" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"Lead Information Deleted"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<json-logger:logger doc:name="Logger" doc:id="375601eb-15ff-4f5a-913e-7ac283461f4f" config-ref="JSON_Logger_Config" message="Lead Information Deleted"/>
+	</flow>
+	<flow name="putLeadFlow" doc:id="43771880-16b5-490f-8ad5-5f8bd4f0f01b" >
+		<db:select doc:name="Select" doc:id="63130854-7f4c-4370-9ac0-505628511491" config-ref="Database_Config" target="recordcount">
+				<db:sql><![CDATA[select count(1) as recordcount from Lead_Information where Lead_Id=:id]]></db:sql>
+				<db:input-parameters><![CDATA[#[{id:payload.Lead_Id}]]]></db:input-parameters>
+			</db:select>
+		<choice doc:name="Choice" doc:id="7df316f8-e967-4ac6-b35c-4f1aa955745d">
+				<when expression="#[vars.recordcount.RECORDCOUNT[0]==1]">
+					<db:update doc:name="Update" doc:id="c13a6e15-2a27-4dff-a54b-a237426e6132" config-ref="Database_Config">
+						<db:sql><![CDATA[update Lead_Information set
+Name = :Name, Company =:Company, Mobile =:Mobile, Email =:Email where Lead_Id = :Lead_Id]]></db:sql>
+						<db:input-parameters><![CDATA[#[payload]]]></db:input-parameters>
+					</db:update>
+				<ee:transform doc:name="Copy_of_Transform Message" doc:id="a1ea801e-e24a-45ac-9963-819206c17b3d" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"Lead Information Updated"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<json-logger:logger doc:name="Logger" doc:id="058170b1-f29f-44f3-9cbb-1a39b06ea251" config-ref="JSON_Logger_Config" message="Lead Information Updated"/>
+				</when>
+				<otherwise>
+					<db:insert doc:name="Insert" doc:id="900bae1c-c79c-47e4-b197-7e06d4a9eb63" config-ref="Database_Config">
+						<db:sql><![CDATA[insert into Lead_Information  (Lead_Id,Name,Company,Mobile,Email) 
+values(:Lead_Id, :Name, :Company, :Mobile, :Email)]]></db:sql>
+						<db:input-parameters><![CDATA[#[payload]]]></db:input-parameters>
+					</db:insert>
+				<ee:transform doc:name="Transform Message" doc:id="9f1ed37e-955a-4dc0-a830-5709f4dec150" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"Lead Information Inserted"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<json-logger:logger doc:name="Logger" doc:id="6479ccbf-c40c-4510-bcb7-eedb33a10d5f" config-ref="JSON_Logger_Config" message="Lead Information Inserted"/>
+				</otherwise>
+			</choice>
+	</flow>
+</mule>

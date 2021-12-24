@@ -1,0 +1,55 @@
+#%RAML 1.0
+title: apisero-address-lookup-sapi
+
+/lead:
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+           example: !include /Example/Exampleapi.raml
+
+  /{id}:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include /Example/Exampleapi.raml
+    delete:
+      responses:
+        200:
+          body:
+            application/json:
+              example: "Information deleted"
+              
+    
+  post:
+    headers:
+      Lead_Id:
+        required: false
+    responses:
+      200:
+        body:
+          application/json:
+           example: "Information Created"
+
+  patch:
+    headers:
+      Lead_Id:
+        required: false
+    responses:
+      200:
+        body:
+          application/json:
+           example: "Information Updated"
+
+  put:
+    headers:
+      Lead_Id:
+        required: false
+    responses:
+      200:
+        body:
+          application/json:
+            example: "Information Created or Updated"
